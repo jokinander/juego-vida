@@ -183,11 +183,11 @@ export default function App() {
 
   // ── HANDLERS ──
   const doCheckin = (mood, grat) => { setCheckins(p => ({ ...p, [today]: { mood, grat } })); addXP(8); };
-  const logGym = () => { if (!gym[today]) { setGym(p => ({ ...p, [today]: true })); addXP(15); } };
-  const logRun = () => { if (!run[today]) { setRun(p => ({ ...p, [today]: true })); addXP(12); } };
-  const logWork = (k) => { const was = (workLog[today] || {})[k]; setWorkLog(p => ({ ...p, [today]: { ...(p[today] || {}), [k]: !was } })); if (!was) addXP(8); };
-  const logEdu = (k) => { const was = (edu[today] || {})[k]; setEdu(p => ({ ...p, [today]: { ...(p[today] || {}), [k]: !was } })); if (!was) addXP(10); };
-  const logTwitter = () => { if (!twitter[today]) { setTwitter(p => ({ ...p, [today]: true })); addXP(5); } };
+  const logGym = () => { const was = !!gym[today]; setGym(p => ({ ...p, [today]: !was })); if (!was) addXP(15); else penXP(15); };
+  const logRun = () => { const was = !!run[today]; setRun(p => ({ ...p, [today]: !was })); if (!was) addXP(12); else penXP(12); };
+  const logWork = (k) => { const was = (workLog[today] || {})[k]; setWorkLog(p => ({ ...p, [today]: { ...(p[today] || {}), [k]: !was } })); if (!was) addXP(8); else penXP(8); };
+  const logEdu = (k) => { const was = (edu[today] || {})[k]; setEdu(p => ({ ...p, [today]: { ...(p[today] || {}), [k]: !was } })); if (!was) addXP(10); else penXP(10); };
+  const logTwitter = () => { const was = !!twitter[today]; setTwitter(p => ({ ...p, [today]: !was })); if (!was) addXP(5); else penXP(5); };
   const logFamily = (k) => { const was = (family[wk] || {})[k]; setFamily(p => ({ ...p, [wk]: { ...(p[wk] || {}), [k]: !was } })); if (!was) addXP(15); };
   const logMed = () => { if (!meditate[today]) { setMeditate(p => ({ ...p, [today]: true })); addXP(10); } };
   const logHabit = (h, st) => { setHabits(p => ({ ...p, [h]: { ...p[h], [today]: st } })); if (st === 'clean') addXP(8); if (st === 'bad') penXP(h === 'fumar' ? 15 : 10); };
