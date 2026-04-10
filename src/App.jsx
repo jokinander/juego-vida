@@ -69,6 +69,7 @@ export default function App() {
   const [meditate, setMeditate] = useState({});
   const [journal, setJournal] = useState({});
   const [breathingDone, setBreathingDone] = useState({});
+  const [fasting, setFasting] = useState({});
 
   const allQuotes = [...BASE_QUOTES, ...customQuotes];
   const [quote] = useState(() => allQuotes[Math.floor(Math.random() * Math.max(allQuotes.length, 1))] || BASE_QUOTES[0]);
@@ -100,6 +101,7 @@ export default function App() {
           if (d.meditate) setMeditate(d.meditate);
           if (d.journal) setJournal(d.journal);
           if (d.breathingDone) setBreathingDone(d.breathingDone);
+          if (d.fasting) setFasting(d.fasting);
         }
       } catch (e) {
         console.error('Firebase load error:', e);
@@ -120,14 +122,14 @@ export default function App() {
         await setDoc(ref, {
           xp, achs, checkins, gratitudes, customQuotes,
           gym, run, workLog, edu, courses, twitter,
-          taskLists, projects, family, habits, meditate, journal, breathingDone,
+          taskLists, projects, family, habits, meditate, journal, breathingDone, fasting,
         });
       } catch (e) {
         console.error('Firebase save error:', e);
       }
     }, 1000);
   }, [xp, achs, checkins, gratitudes, customQuotes, gym, run, workLog, edu,
-    courses, twitter, taskLists, projects, family, habits, meditate, journal, breathingDone, loaded]);
+    courses, twitter, taskLists, projects, family, habits, meditate, journal, breathingDone, fasting, loaded]);
 
   // ── PHASE MANAGEMENT ──
   useEffect(() => {
@@ -189,6 +191,7 @@ export default function App() {
   const logFamily = (k) => { const was = (family[wk] || {})[k]; setFamily(p => ({ ...p, [wk]: { ...(p[wk] || {}), [k]: !was } })); if (!was) addXP(15); };
   const logMed = () => { if (!meditate[today]) { setMeditate(p => ({ ...p, [today]: true })); addXP(10); } };
   const logHabit = (h, st) => { setHabits(p => ({ ...p, [h]: { ...p[h], [today]: st } })); if (st === 'clean') addXP(8); if (st === 'bad') penXP(h === 'fumar' ? 15 : 10); };
+  const logFast = () => { if (!fasting[today]) { setFasting(p => ({ ...p, [today]: true })); addXP(10); } };
 
   // ── LOADING SCREEN ──
   if (!loaded) {
@@ -245,7 +248,7 @@ export default function App() {
   const renderTab = () => {
     switch (tab) {
       case 'home': return <HomeTab state={homeState} />;
-      case 'fisico': return <FisicoTab gym={gym} run={run} today={today} weekGym={weekGym} weekRun={weekRun} streak={streak} onLogGym={logGym} onLogRun={logRun} />;
+      case 'fisico': return <FisicoTab gym={gym} run={run} today={today} weekGym={weekGym} weekRun={weekRun} streak={streak} onLogGym={logGym} onLogRun={logRun} fasting={fasting} wk={wk} onLogFast={logFast} />;
       case 'work': return <WorkTab workLog={workLog} today={today} onLogWork={logWork} />;
       case 'edu': return <EduTab edu={edu} courses={courses} today={today} weekEdu={weekEdu} onLogEdu={logEdu} setCourses={setCourses} addXP={addXP} />;
       case 'tareas': return <TareasTab taskLists={taskLists} setTaskLists={setTaskLists} addXP={addXP} />;

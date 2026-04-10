@@ -3,17 +3,42 @@ import { Card, Section, Toggle, WeekDots, AddInput, CheckItem } from './UI';
 import { calcHabitStreak, getWeekKey, CALM_TIPS, startRain, stopRain } from '../utils';
 
 // ─── FÍSICO ─────────────────────────────────────────────────────────
-export function FisicoTab({ gym, run, today, weekGym, weekRun, streak, onLogGym, onLogRun }) {
+export function FisicoTab({ gym, run, today, weekGym, weekRun, streak, onLogGym, onLogRun, fasting, wk, onLogFast }) {
+  const weekFast = Object.keys(fasting || {}).filter(d => {
+    const start = new Date(wk);
+    const end = new Date(wk); end.setDate(end.getDate() + 7);
+    const day = new Date(d);
+    return day >= start && day < end;
+  }).length;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <Card><Section icon="🏋️" text="Gimnasio" color="var(--c1)">
         <WeekDots current={weekGym} max={3} color="var(--c1)" icon="🏋️" />
         <div style={{ marginTop: 12 }}><Toggle label={gym[today] ? "Gym ✓" : "Fui al gym"} active={!!gym[today]} color="var(--c1)" onToggle={onLogGym} icon="🏋️" /></div>
       </Section></Card>
+
       <Card><Section icon="🏃" text="Corrida" color="var(--c2)">
         <WeekDots current={weekRun} max={3} color="var(--c2)" icon="🏃" />
         <div style={{ marginTop: 12 }}><Toggle label={run[today] ? "Corrida ✓" : "Corrí hoy"} active={!!run[today]} color="var(--c2)" onToggle={onLogRun} icon="🏃" /></div>
       </Section></Card>
+
+      <Card><Section icon="⚡" text="Ayuno Semanal" color="var(--c3)">
+        <div style={{ fontFamily: 'var(--mf)', fontSize: 10, color: 'var(--t2)', marginBottom: 10 }}>
+          Esta semana: <span style={{ color: 'var(--c3)', fontWeight: 700 }}>{weekFast}</span> ayuno{weekFast !== 1 ? 's' : ''}
+        </div>
+        <Toggle
+          label={(fasting || {})[today] ? "Ayuno ✓" : "Hice ayuno hoy"}
+          active={!!(fasting || {})[today]}
+          color="var(--c3)"
+          onToggle={onLogFast}
+          icon="⚡"
+        />
+        <div style={{ fontFamily: 'var(--mf)', fontSize: 10, color: 'var(--t2)', marginTop: 8 }}>
+          Total: {Object.keys(fasting || {}).length} ayunos
+        </div>
+      </Section></Card>
+
       <Card style={{ background: 'linear-gradient(135deg, var(--sf), #2d1b1b)' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 24 }}>
           <div style={{ textAlign: 'center' }}><div style={{ fontSize: 32 }}>🔥</div><div style={{ fontWeight: 900, fontSize: 28, color: 'var(--c5)' }}>{streak}</div><div style={{ fontFamily: 'var(--mf)', fontSize: 10, color: 'var(--t2)' }}>racha</div></div>

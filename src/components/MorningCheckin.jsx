@@ -2,12 +2,17 @@ import { useState } from 'react';
 import { MOODS, formatDate } from '../utils';
 
 export default function MorningCheckin({ gratitudes, setGratitudes, onDone }) {
+  const [mood, setMood] = useState(null);
   const [gIdx, setGIdx] = useState(null);
   const [adding, setAdding] = useState(false);
   const [newG, setNewG] = useState('');
+  const [error, setError] = useState('');
 
-  const submit = (mood) => {
-    onDone(mood, gIdx !== null ? gratitudes[gIdx] : null);
+  const submit = () => {
+    if (!mood) { setError('Elegí cómo arrancás hoy 👆'); return; }
+    if (gIdx === null) { setError('Elegí algo por lo que estés agradecido 🙏'); return; }
+    setError('');
+    onDone(mood, gratitudes[gIdx]);
   };
 
   return (
@@ -32,35 +37,33 @@ export default function MorningCheckin({ gratitudes, setGratitudes, onDone }) {
 
       <div style={{ display: 'flex', gap: 10, marginBottom: 28, flexWrap: 'wrap', justifyContent: 'center' }}>
         {MOODS.map((m, i) => (
-          <button key={i} onClick={() => submit(m)} style={{
-            padding: '14px 10px', background: 'var(--sf)', border: '2px solid var(--bd)',
+          <button key={i} onClick={() => { setMood(m); setError(''); }} style={{
+            padding: '14px 10px', background: mood === m ? m.color + '25' : 'var(--sf)',
+            border: `2px solid ${mood === m ? m.color : 'var(--bd)'}`,
             borderRadius: 14, cursor: 'pointer', width: 60, textAlign: 'center',
             transition: 'all .15s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = m.color; e.currentTarget.style.background = m.color + '15'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bd)'; e.currentTarget.style.background = 'var(--sf)'; }}
-          >
+          }}>
             <div style={{ fontSize: 28 }}>{m.emoji}</div>
-            <div style={{ fontFamily: 'var(--mf)', fontSize: 9, color: 'var(--t2)', marginTop: 4 }}>{m.label}</div>
+            <div style={{ fontFamily: 'var(--mf)', fontSize: 9, color: mood === m ? m.color : 'var(--t2)', marginTop: 4 }}>{m.label}</div>
           </button>
         ))}
       </div>
 
       <p style={{ fontFamily: 'var(--mf)', fontSize: 11, color: 'var(--t2)', marginBottom: 10 }}>
-        Agradecido por (opcional):
+        Agradecido por <span style={{ color: 'var(--c1)' }}>*</span>
       </p>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', maxWidth: 400, marginBottom: 12 }}>
         {gratitudes.map((g, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <button onClick={() => setGIdx(gIdx === i ? null : i)} style={{
+            <button onClick={() => { setGIdx(gIdx === i ? null : i); setError(''); }} style={{
               padding: '6px 12px', borderRadius: 8, fontSize: 12,
               background: gIdx === i ? 'var(--c3)22' : 'var(--sf)',
               color: gIdx === i ? 'var(--c3)' : 'var(--t2)',
               border: `1px solid ${gIdx === i ? 'var(--c3)55' : 'var(--bd)'}`,
               cursor: 'pointer',
             }}>{g}</button>
-            <button onClick={() => setGratitudes(p => p.filter((_, j) => j !== i))} style={{
+            <button onClick={() => { setGratitudes(p => p.filter((_, j) => j !== i)); if (gIdx === i) setGIdx(null); }} style={{
               background: '#ff6b6b22', border: '1px solid #ff6b6b44', color: '#ff6b6b',
               cursor: 'pointer', fontSize: 12, padding: '2px 6px', borderRadius: 6, fontWeight: 700,
             }}>×</button>
@@ -85,7 +88,19 @@ export default function MorningCheckin({ gratitudes, setGratitudes, onDone }) {
         </div>
       )}
 
-      <div style={{ fontSize: 13, color: 'var(--t2)' }}>Tocá un emoji para arrancar ☝️</div>
+      {error && (
+        <div style={{ marginBottom: 14, padding: '8px 16px', background: '#ff6b6b15', border: '1px solid #ff6b6b44', borderRadius: 10, color: '#ff6b6b', fontSize: 13, fontWeight: 600 }}>
+          {error}
+        </div>
+      )}
+
+      <button onClick={submit} style={{
+        padding: '14px 40px', background: 'linear-gradient(135deg, var(--c1), var(--c3))',
+        border: 'none', borderRadius: 14, cursor: 'pointer', fontWeight: 900,
+        fontSize: 16, color: '#fff', letterSpacing: 1,
+      }}>
+        ARRANCAR 🎮
+      </button>
     </div>
   );
 }
