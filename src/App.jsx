@@ -190,7 +190,17 @@ export default function App() {
   const logTwitter = () => { const was = !!twitter[today]; setTwitter(p => ({ ...p, [today]: !was })); if (!was) addXP(5); else penXP(5); };
   const logFamily = (k) => { const was = (family[wk] || {})[k]; setFamily(p => ({ ...p, [wk]: { ...(p[wk] || {}), [k]: !was } })); if (!was) addXP(15); };
   const logMed = () => { if (!meditate[today]) { setMeditate(p => ({ ...p, [today]: true })); addXP(10); } };
-  const logHabit = (h, st) => { setHabits(p => ({ ...p, [h]: { ...p[h], [today]: st } })); if (st === 'clean') addXP(8); if (st === 'bad') penXP(h === 'fumar' ? 15 : 10); };
+  const logHabit = (h, st) => {
+    const prev = (habits[h] || {})[today];
+    if (prev === st) return; // mismo estado, no hacer nada
+    setHabits(p => ({ ...p, [h]: { ...p[h], [today]: st } }));
+    // revertir XP anterior
+    if (prev === 'clean') penXP(8);
+    if (prev === 'bad') addXP(h === 'fumar' ? 15 : 10);
+    // aplicar nuevo XP
+    if (st === 'clean') addXP(8);
+    if (st === 'bad') penXP(h === 'fumar' ? 15 : 10);
+  };
   const logFast = () => { if (!fasting[today]) { setFasting(p => ({ ...p, [today]: true })); addXP(10); } };
 
   // ── LOADING SCREEN ──

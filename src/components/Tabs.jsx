@@ -224,16 +224,17 @@ export function HabitsTab({ habits, today, onLogHabit }) {
                   <div style={{ fontFamily: 'var(--mf)', fontSize: 9, color: 'var(--t2)' }}>racha</div>
                 </div>
                 <div style={{ flex: 1 }}>
-                  {!todayH ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button onClick={() => onLogHabit(h.k, 'clean')} style={{ flex: 1, padding: 10, background: h.c + '22', border: `1.5px solid ${h.c}44`, borderRadius: 10, cursor: 'pointer', fontWeight: 700, fontSize: 13, color: h.c }}>✓ Limpio</button>
-                      <button onClick={() => onLogHabit(h.k, 'bad')} style={{ padding: '10px 14px', background: '#ff6b6b15', border: '1.5px solid #ff6b6b33', borderRadius: 10, cursor: 'pointer', fontWeight: 600, fontSize: 13, color: '#ff6b6b' }}>✗ Malo</button>
+                      <button onClick={() => onLogHabit(h.k, 'clean')} style={{ flex: 1, padding: 10, background: todayH === 'clean' ? h.c + '33' : h.c + '11', border: `1.5px solid ${todayH === 'clean' ? h.c : h.c + '33'}`, borderRadius: 10, cursor: 'pointer', fontWeight: 700, fontSize: 13, color: h.c }}>
+                        {todayH === 'clean' ? '✓ Limpio' : 'Limpio'}
+                      </button>
+                      <button onClick={() => onLogHabit(h.k, 'bad')} style={{ padding: '10px 14px', background: todayH === 'bad' ? '#ff6b6b33' : '#ff6b6b11', border: `1.5px solid ${todayH === 'bad' ? '#ff6b6b' : '#ff6b6b33'}`, borderRadius: 10, cursor: 'pointer', fontWeight: 600, fontSize: 13, color: '#ff6b6b' }}>
+                        {todayH === 'bad' ? '✗ Malo' : 'Malo'}
+                      </button>
                     </div>
-                  ) : (
-                    <div style={{ padding: '10px 14px', background: todayH === 'clean' ? h.c + '11' : '#ff6b6b11', borderRadius: 10, border: `1px solid ${todayH === 'clean' ? h.c + '33' : '#ff6b6b33'}`, fontWeight: 600, fontSize: 13, color: todayH === 'clean' ? h.c : '#ff6b6b' }}>
-                      {todayH === 'clean' ? '✓ +8 XP' : `✗ ${h.pen ? '-15' : '-10'} XP`}
-                    </div>
-                  )}
+                    {todayH && <div style={{ fontFamily: 'var(--mf)', fontSize: 10, color: todayH === 'clean' ? h.c : '#ff6b6b', textAlign: 'center' }}>{todayH === 'clean' ? '+8 XP' : `${h.pen ? '-15' : '-10'} XP`}</div>}
+                  </div>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 3, marginBottom: 6 }}>
