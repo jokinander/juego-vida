@@ -39,11 +39,25 @@ export function FisicoTab({ gym, run, today, weekGym, weekRun, streak, onLogGym,
         </div>
       </Section></Card>
 
-      <Card style={{ background: 'linear-gradient(135deg, var(--sf), #2d1b1b)' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 24 }}>
-          <div style={{ textAlign: 'center' }}><div style={{ fontSize: 32 }}>🔥</div><div style={{ fontWeight: 900, fontSize: 28, color: 'var(--c5)' }}>{streak}</div><div style={{ fontFamily: 'var(--mf)', fontSize: 10, color: 'var(--t2)' }}>racha</div></div>
-          <div style={{ width: 1, background: 'var(--bd)' }} />
-          <div style={{ textAlign: 'center' }}><div style={{ fontSize: 32 }}>📈</div><div style={{ fontWeight: 900, fontSize: 28, color: 'var(--c6)' }}>{Object.keys(gym).length + Object.keys(run).length}</div><div style={{ fontFamily: 'var(--mf)', fontSize: 10, color: 'var(--t2)' }}>total</div></div>
+      <Card style={{ background: 'linear-gradient(135deg, var(--sf), #1a1a2e)', border: '1px solid var(--c1)22' }}>
+        <div style={{ fontFamily: 'var(--mf)', fontSize: 10, color: 'var(--c1)', letterSpacing: 1, marginBottom: 8 }}>📊 RESUMEN SEMANAL</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+            <span style={{ color: 'var(--t2)' }}>🏋️ Gym</span>
+            <span style={{ color: weekGym >= 3 ? 'var(--grn)' : weekGym >= 1 ? 'var(--c3)' : '#ff6b6b', fontWeight: 700 }}>{weekGym}/3 {weekGym >= 3 ? '✓' : ''}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+            <span style={{ color: 'var(--t2)' }}>🏃 Corrida</span>
+            <span style={{ color: weekRun >= 3 ? 'var(--grn)' : weekRun >= 1 ? 'var(--c3)' : '#ff6b6b', fontWeight: 700 }}>{weekRun}/3 {weekRun >= 3 ? '✓' : ''}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+            <span style={{ color: 'var(--t2)' }}>⚡ Ayunos</span>
+            <span style={{ color: weekFast >= 1 ? 'var(--c3)' : 'var(--t2)', fontWeight: 700 }}>{weekFast} esta semana</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+            <span style={{ color: 'var(--t2)' }}>🔥 Racha actual</span>
+            <span style={{ color: streak >= 7 ? 'var(--c5)' : streak >= 3 ? 'var(--c3)' : 'var(--t2)', fontWeight: 700 }}>{streak} días</span>
+          </div>
         </div>
       </Card>
     </div>
@@ -51,19 +65,43 @@ export function FisicoTab({ gym, run, today, weekGym, weekRun, streak, onLogGym,
 }
 
 // ─── WORK ────────────────────────────────────────────────────────────
-export function WorkTab({ workLog, today, onLogWork }) {
+export function WorkTab({ workLog, today, onLogWork, wk }) {
+  const weekDays = [...Array(7)].map((_, i) => { const d = new Date(wk); d.setDate(d.getDate() + i); return d.toISOString().split('T')[0]; });
+  const weekPlanned = weekDays.filter(d => (workLog[d] || {}).planned).length;
+  const weekCoord = weekDays.filter(d => (workLog[d] || {}).coordinated).length;
+
   return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
     <Card><Section icon="💼" text="Agile — Hoy" color="var(--c6)">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <Toggle label="Planifiqué" active={(workLog[today] || {}).planned} color="var(--c6)" onToggle={() => onLogWork('planned')} icon="📋" />
         <Toggle label="Coordinación" active={(workLog[today] || {}).coordinated} color="var(--c4)" onToggle={() => onLogWork('coordinated')} icon="📞" />
       </div>
     </Section></Card>
+    <Card style={{ background: 'linear-gradient(135deg, var(--sf), #1a1a2e)', border: '1px solid var(--c6)22' }}>
+      <div style={{ fontFamily: 'var(--mf)', fontSize: 10, color: 'var(--c6)', letterSpacing: 1, marginBottom: 8 }}>📊 RESUMEN SEMANAL</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+          <span style={{ color: 'var(--t2)' }}>📋 Planifiqué</span>
+          <span style={{ color: weekPlanned >= 4 ? 'var(--grn)' : weekPlanned >= 2 ? 'var(--c3)' : 'var(--t2)', fontWeight: 700 }}>{weekPlanned} días</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+          <span style={{ color: 'var(--t2)' }}>📞 Coordiné</span>
+          <span style={{ color: weekCoord >= 4 ? 'var(--grn)' : weekCoord >= 2 ? 'var(--c3)' : 'var(--t2)', fontWeight: 700 }}>{weekCoord} días</span>
+        </div>
+      </div>
+    </Card>
+    </div>
   );
 }
 
 // ─── EDUCACIÓN ───────────────────────────────────────────────────────
-export function EduTab({ edu, courses, today, weekEdu, onLogEdu, setCourses, addXP }) {
+export function EduTab({ edu, courses, today, weekEdu, onLogEdu, setCourses, addXP, wk }) {
+  const weekDays = [...Array(7)].map((_, i) => { const d = new Date(wk); d.setDate(d.getDate() + i); return d.toISOString().split('T')[0]; });
+  const weekReading = weekDays.filter(d => (edu[d] || {}).reading).length;
+  const weekPodcast = weekDays.filter(d => (edu[d] || {}).podcast).length;
+  const weekVideo = weekDays.filter(d => (edu[d] || {}).video).length;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <Card><Section icon="📚" text="Hoy aprendí" color="var(--c4)">
@@ -72,8 +110,28 @@ export function EduTab({ edu, courses, today, weekEdu, onLogEdu, setCourses, add
           <Toggle label="Podcast" active={(edu[today] || {}).podcast} color="var(--pink)" onToggle={() => onLogEdu('podcast')} icon="🎙️" />
           <Toggle label="Video educativo" active={(edu[today] || {}).video} color="var(--c6)" onToggle={() => onLogEdu('video')} icon="🎬" />
         </div>
-        <div style={{ fontFamily: 'var(--mf)', fontSize: 10, color: 'var(--t2)', marginTop: 10 }}>Semana: {weekEdu}</div>
       </Section></Card>
+      <Card style={{ background: 'linear-gradient(135deg, var(--sf), #1a1a2e)', border: '1px solid var(--c4)22' }}>
+        <div style={{ fontFamily: 'var(--mf)', fontSize: 10, color: 'var(--c4)', letterSpacing: 1, marginBottom: 8 }}>📊 RESUMEN SEMANAL</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+            <span style={{ color: 'var(--t2)' }}>📖 Lecturas</span>
+            <span style={{ color: weekReading >= 3 ? 'var(--grn)' : weekReading >= 1 ? 'var(--c3)' : 'var(--t2)', fontWeight: 700 }}>{weekReading} días</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+            <span style={{ color: 'var(--t2)' }}>🎙️ Podcasts</span>
+            <span style={{ color: weekPodcast >= 3 ? 'var(--grn)' : weekPodcast >= 1 ? 'var(--c3)' : 'var(--t2)', fontWeight: 700 }}>{weekPodcast} días</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+            <span style={{ color: 'var(--t2)' }}>🎬 Videos</span>
+            <span style={{ color: weekVideo >= 3 ? 'var(--grn)' : weekVideo >= 1 ? 'var(--c3)' : 'var(--t2)', fontWeight: 700 }}>{weekVideo} días</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+            <span style={{ color: 'var(--t2)' }}>📊 Total actividades</span>
+            <span style={{ color: weekEdu >= 5 ? 'var(--grn)' : 'var(--c3)', fontWeight: 700 }}>{weekEdu} esta sem</span>
+          </div>
+        </div>
+      </Card>
       <Card><Section icon="🎓" text="Cursos (no kinesio)" color="var(--c3)">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {courses.length === 0 && <p style={{ fontSize: 13, color: 'var(--t2)' }}>¿Arrancás algún curso?</p>}
@@ -178,6 +236,9 @@ export function ProjectsTab({ projects, setProjects, addXP, today }) {
 
 // ─── FAMILIA ─────────────────────────────────────────────────────────
 export function FamilyTab({ family, weekFam, onLogFamily }) {
+  const totalCalls = Object.values(family).filter(w => w.calledParents).length;
+  const totalAitziber = Object.values(family).filter(w => w.sawAitziber).length;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <Card style={{ background: 'linear-gradient(135deg, var(--sf), #2d1a1a)', border: '1px solid var(--c1)33' }}>
@@ -188,9 +249,25 @@ export function FamilyTab({ family, weekFam, onLogFamily }) {
           </div>
         </Section>
       </Card>
-      <Card>
-        <div style={{ fontFamily: 'var(--mf)', fontSize: 11, color: 'var(--t2)' }}>
-          Llamadas: {Object.values(family).filter(w => w.calledParents).length} sem · Aitziber: {Object.values(family).filter(w => w.sawAitziber).length} sem
+      <Card style={{ background: 'linear-gradient(135deg, var(--sf), #1a1a2e)', border: '1px solid var(--c1)22' }}>
+        <div style={{ fontFamily: 'var(--mf)', fontSize: 10, color: 'var(--c1)', letterSpacing: 1, marginBottom: 8 }}>📊 RESUMEN SEMANAL</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+            <span style={{ color: 'var(--t2)' }}>📞 Llamadas a viejos</span>
+            <span style={{ color: weekFam.calledParents ? 'var(--grn)' : '#ff6b6b', fontWeight: 700 }}>{weekFam.calledParents ? '✓ Esta semana' : '✗ Pendiente'}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+            <span style={{ color: 'var(--t2)' }}>👫 Vi a Aitziber</span>
+            <span style={{ color: weekFam.sawAitziber ? 'var(--grn)' : '#ff6b6b', fontWeight: 700 }}>{weekFam.sawAitziber ? '✓ Esta semana' : '✗ Pendiente'}</span>
+          </div>
+          <div style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid var(--bd)', display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+            <span style={{ color: 'var(--t2)' }}>📈 Total llamadas</span>
+            <span style={{ color: 'var(--c3)', fontWeight: 700 }}>{totalCalls} sem</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+            <span style={{ color: 'var(--t2)' }}>📈 Total Aitziber</span>
+            <span style={{ color: 'var(--pink)', fontWeight: 700 }}>{totalAitziber} sem</span>
+          </div>
         </div>
       </Card>
     </div>
@@ -241,7 +318,7 @@ export function HabitsTab({ habits, today, onLogHabit }) {
                 {weekDays.map(d => { const s = habits[h.k][d]; return <div key={d} style={{ flex: 1, height: 8, borderRadius: 4, background: s === 'clean' ? h.c : s === 'bad' ? '#ff6b6b' : 'var(--s2)' }} />; })}
               </div>
               <div style={{ fontFamily: 'var(--mf)', fontSize: 10, color: 'var(--t2)' }}>
-                Sem: <span style={{ color: h.c }}>{wClean}✓</span> · <span style={{ color: '#ff6b6b' }}>{wBad}✗</span>
+                Sem: <span style={{ color: h.c }}>{wClean}✓</span> · <span style={{ color: '#ff6b6b' }}>{wBad}✗</span> · <span style={{ color: 'var(--t2)' }}>{7 - wClean - wBad} sin marcar</span>
               </div>
             </Section>
           </Card>

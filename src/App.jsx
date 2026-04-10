@@ -259,8 +259,8 @@ export default function App() {
     switch (tab) {
       case 'home': return <HomeTab state={homeState} />;
       case 'fisico': return <FisicoTab gym={gym} run={run} today={today} weekGym={weekGym} weekRun={weekRun} streak={streak} onLogGym={logGym} onLogRun={logRun} fasting={fasting} wk={wk} onLogFast={logFast} />;
-      case 'work': return <WorkTab workLog={workLog} today={today} onLogWork={logWork} />;
-      case 'edu': return <EduTab edu={edu} courses={courses} today={today} weekEdu={weekEdu} onLogEdu={logEdu} setCourses={setCourses} addXP={addXP} />;
+      case 'work': return <WorkTab workLog={workLog} today={today} onLogWork={logWork} wk={wk} />;
+      case 'edu': return <EduTab edu={edu} courses={courses} today={today} weekEdu={weekEdu} onLogEdu={logEdu} setCourses={setCourses} addXP={addXP} wk={wk} />;
       case 'tareas': return <TareasTab taskLists={taskLists} setTaskLists={setTaskLists} addXP={addXP} />;
       case 'digital': return <DigitalTab twitter={twitter} today={today} onLogTwitter={logTwitter} />;
       case 'projects': return <ProjectsTab projects={projects} setProjects={setProjects} addXP={addXP} today={today} />;
