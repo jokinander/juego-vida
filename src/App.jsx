@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from './firebase';
 import {
   getToday, getWeekKey, inWeek, isEvening, formatDate, load, save,
   getLevel, calcWorkoutStreak, calcHabitStreak,
@@ -10,63 +12,133 @@ import EveningJournal from './components/EveningJournal';
 import HomeTab from './components/HomeTab';
 import { FisicoTab, WorkTab, EduTab, TareasTab, DigitalTab, ProjectsTab, FamilyTab, HabitsTab, CalmaTab, LogrosTab } from './components/Tabs';
 
+const DOC_ID = 'main';
+const COL = 'juego-vida';
+
+const DEFAULT_STATE = {
+  xp: 0,
+  achs: [],
+  checkins: {},
+  gratitudes: DEFAULT_GRATITUDES,
+  customQuotes: [],
+  gym: {},
+  run: {},
+  workLog: {},
+  edu: {},
+  courses: [],
+  twitter: {},
+  taskLists: { super: [], houseShop: [], houseTasks: [], life: [] },
+  projects: [
+    { id: 1, name: 'Distribución Fármacos Animales', icon: '💊', ideas: [] },
+    { id: 2, name: 'Proyecto Inmobiliario San Martín', icon: '🏗️', ideas: [] },
+  ],
+  family: {},
+  habits: { comer: {}, alcohol: {}, fumar: {} },
+  meditate: {},
+  journal: {},
+  breathingDone: {},
+};
+
 export default function App() {
   const today = getToday();
   const wk = getWeekKey();
 
-  // Phase: init | breathing | journal | app
+  const [loaded, setLoaded] = useState(false);
   const [phase, setPhase] = useState('init');
   const [tab, setTab] = useState('home');
 
-  // All state
-  const [xp, setXp] = useState(() => load('xp', 0));
-  const [achs, setAchs] = useState(() => load('achs', []));
+  const [xp, setXp] = useState(0);
+  const [achs, setAchs] = useState([]);
   const [newAch, setNewAch] = useState(null);
-  const [checkins, setCheckins] = useState(() => load('checkins', {}));
-  const [gratitudes, setGratitudes] = useState(() => load('grats', DEFAULT_GRATITUDES));
-  const [customQuotes, setCustomQuotes] = useState(() => load('cq', []));
-  const [gym, setGym] = useState(() => load('gym', {}));
-  const [run, setRun] = useState(() => load('run', {}));
-  const [workLog, setWorkLog] = useState(() => load('work', {}));
-  const [edu, setEdu] = useState(() => load('edu', {}));
-  const [courses, setCourses] = useState(() => load('courses', []));
-  const [twitter, setTwitter] = useState(() => load('twitter', {}));
-  const [taskLists, setTaskLists] = useState(() => load('tasks', { super: [], houseShop: [], houseTasks: [], life: [] }));
-  const [projects, setProjects] = useState(() => load('projects', [
+  const [checkins, setCheckins] = useState({});
+  const [gratitudes, setGratitudes] = useState(DEFAULT_GRATITUDES);
+  const [customQuotes, setCustomQuotes] = useState([]);
+  const [gym, setGym] = useState({});
+  const [run, setRun] = useState({});
+  const [workLog, setWorkLog] = useState({});
+  const [edu, setEdu] = useState({});
+  const [courses, setCourses] = useState([]);
+  const [twitter, setTwitter] = useState({});
+  const [taskLists, setTaskLists] = useState({ super: [], houseShop: [], houseTasks: [], life: [] });
+  const [projects, setProjects] = useState([
     { id: 1, name: 'Distribución Fármacos Animales', icon: '💊', ideas: [] },
     { id: 2, name: 'Proyecto Inmobiliario San Martín', icon: '🏗️', ideas: [] },
-  ]));
-  const [family, setFamily] = useState(() => load('family', {}));
-  const [habits, setHabits] = useState(() => load('habits', { comer: {}, alcohol: {}, fumar: {} }));
-  const [meditate, setMeditate] = useState(() => load('meditate', {}));
-  const [journal, setJournal] = useState(() => load('journal', {}));
+  ]);
+  const [family, setFamily] = useState({});
+  const [habits, setHabits] = useState({ comer: {}, alcohol: {}, fumar: {} });
+  const [meditate, setMeditate] = useState({});
+  const [journal, setJournal] = useState({});
+  const [breathingDone, setBreathingDone] = useState({});
 
-  // Quote
   const allQuotes = [...BASE_QUOTES, ...customQuotes];
   const [quote] = useState(() => allQuotes[Math.floor(Math.random() * Math.max(allQuotes.length, 1))] || BASE_QUOTES[0]);
   const [eveningPrompt] = useState(() => EVENING_PROMPTS[Math.floor(Math.random() * EVENING_PROMPTS.length)]);
 
-  // Persist all state
+  // ── LOAD FROM FIREBASE ──
   useEffect(() => {
-    const data = [
-      ['xp', xp], ['achs', achs], ['checkins', checkins], ['grats', gratitudes],
-      ['cq', customQuotes], ['gym', gym], ['run', run], ['work', workLog],
-      ['edu', edu], ['courses', courses], ['twitter', twitter], ['tasks', taskLists],
-      ['projects', projects], ['family', family], ['habits', habits],
-      ['meditate', meditate], ['journal', journal],
-    ];
-    data.forEach(([k, v]) => save(k, v));
-  });
+    const fetchData = async () => {
+      try {
+        const ref = doc(db, COL, DOC_ID);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          const d = snap.data();
+          if (d.xp !== undefined) setXp(d.xp);
+          if (d.achs) setAchs(d.achs);
+          if (d.checkins) setCheckins(d.checkins);
+          if (d.gratitudes) setGratitudes(d.gratitudes);
+          if (d.customQuotes) setCustomQuotes(d.customQuotes);
+          if (d.gym) setGym(d.gym);
+          if (d.run) setRun(d.run);
+          if (d.workLog) setWorkLog(d.workLog);
+          if (d.edu) setEdu(d.edu);
+          if (d.courses) setCourses(d.courses);
+          if (d.twitter) setTwitter(d.twitter);
+          if (d.taskLists) setTaskLists(d.taskLists);
+          if (d.projects) setProjects(d.projects);
+          if (d.family) setFamily(d.family);
+          if (d.habits) setHabits(d.habits);
+          if (d.meditate) setMeditate(d.meditate);
+          if (d.journal) setJournal(d.journal);
+          if (d.breathingDone) setBreathingDone(d.breathingDone);
+        }
+      } catch (e) {
+        console.error('Firebase load error:', e);
+      }
+      setLoaded(true);
+    };
+    fetchData();
+  }, []);
 
-  // Phase management
+  // ── SAVE TO FIREBASE (debounced) ──
+  const saveTimer = useRef(null);
   useEffect(() => {
+    if (!loaded) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(async () => {
+      try {
+        const ref = doc(db, COL, DOC_ID);
+        await setDoc(ref, {
+          xp, achs, checkins, gratitudes, customQuotes,
+          gym, run, workLog, edu, courses, twitter,
+          taskLists, projects, family, habits, meditate, journal, breathingDone,
+        });
+      } catch (e) {
+        console.error('Firebase save error:', e);
+      }
+    }, 1000);
+  }, [xp, achs, checkins, gratitudes, customQuotes, gym, run, workLog, edu,
+    courses, twitter, taskLists, projects, family, habits, meditate, journal, breathingDone, loaded]);
+
+  // ── PHASE MANAGEMENT ──
+  useEffect(() => {
+    if (!loaded) return;
     if (!checkins[today]) setPhase('init');
-    else if (!load('bd_' + today, false)) setPhase('breathing');
+    else if (!breathingDone[today]) setPhase('breathing');
     else if (isEvening() && !journal[today]) setPhase('journal');
     else setPhase('app');
-  }, [checkins, journal, today]);
+  }, [checkins, journal, breathingDone, today, loaded]);
 
-  // Calculations
+  // ── CALCULATIONS ──
   const weekGym = Object.keys(gym).filter(d => inWeek(d, wk)).length;
   const weekRun = Object.keys(run).filter(d => inWeek(d, wk)).length;
   const weekEdu = Object.entries(edu).filter(([d]) => inWeek(d, wk)).reduce((s, [, v]) => s + Object.values(v).filter(Boolean).length, 0);
@@ -76,11 +148,10 @@ export default function App() {
   const weekPerfect = weekGym >= 3 && weekRun >= 3 && weekEdu >= 3 && weekFam.calledParents && weekFam.sawAitziber;
   const level = getLevel(xp);
 
-  // XP helpers
   const addXP = (n) => setXp(p => p + n);
   const penXP = (n) => setXp(p => Math.max(0, p - n));
 
-  // Achievement checking
+  // ── ACHIEVEMENTS ──
   const getStats = useCallback(() => ({
     gymTotal: Object.keys(gym).length, runTotal: Object.keys(run).length,
     weekGym, weekRun, streak, xp,
@@ -96,6 +167,7 @@ export default function App() {
   }), [gym, run, edu, twitter, family, meditate, checkins, projects, workLog, habits, xp, customQuotes, wk, weekPerfect]);
 
   useEffect(() => {
+    if (!loaded) return;
     const stats = getStats();
     ACHIEVEMENTS.forEach(a => {
       if (!achs.includes(a.id) && a.check(stats)) {
@@ -107,7 +179,7 @@ export default function App() {
     });
   }, [gym, run, edu, twitter, family, meditate, checkins, projects, workLog, habits, xp, customQuotes]);
 
-  // Handlers
+  // ── HANDLERS ──
   const doCheckin = (mood, grat) => { setCheckins(p => ({ ...p, [today]: { mood, grat } })); addXP(8); };
   const logGym = () => { if (!gym[today]) { setGym(p => ({ ...p, [today]: true })); addXP(15); } };
   const logRun = () => { if (!run[today]) { setRun(p => ({ ...p, [today]: true })); addXP(12); } };
@@ -118,15 +190,25 @@ export default function App() {
   const logMed = () => { if (!meditate[today]) { setMeditate(p => ({ ...p, [today]: true })); addXP(10); } };
   const logHabit = (h, st) => { setHabits(p => ({ ...p, [h]: { ...p[h], [today]: st } })); if (st === 'clean') addXP(8); if (st === 'bad') penXP(h === 'fumar' ? 15 : 10); };
 
-  // ═══ PHASE RENDERS ═══
+  // ── LOADING SCREEN ──
+  if (!loaded) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
+        <div style={{ fontSize: 40 }}>🎮</div>
+        <div style={{ fontFamily: 'var(--mf)', fontSize: 12, color: 'var(--t2)', letterSpacing: 2 }}>CARGANDO...</div>
+      </div>
+    );
+  }
+
+  // ── PHASE RENDERS ──
   if (phase === 'init') {
     return <MorningCheckin gratitudes={gratitudes} setGratitudes={setGratitudes} onDone={doCheckin} />;
   }
 
   if (phase === 'breathing') {
     return <BreathingScreen
-      onDone={() => { save('bd_' + today, true); logMed(); setPhase('app'); }}
-      onSkip={() => { save('bd_' + today, true); setPhase('app'); }}
+      onDone={() => { setBreathingDone(p => ({ ...p, [today]: true })); logMed(); setPhase('app'); }}
+      onSkip={() => { setBreathingDone(p => ({ ...p, [today]: true })); setPhase('app'); }}
     />;
   }
 
@@ -140,7 +222,7 @@ export default function App() {
     />;
   }
 
-  // ═══ MAIN APP ═══
+  // ── MAIN APP ──
   const homeState = {
     xp, checkins, today, quote, gym, run, edu, twitter, meditate, workLog,
     weekGym, weekRun, weekEdu, weekFam, streak, habits, achs, ACHS_LIST: ACHIEVEMENTS,
@@ -180,7 +262,6 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--tx)', fontFamily: 'var(--hf)', maxWidth: 480, margin: '0 auto', paddingBottom: 68 }}>
 
-      {/* Achievement popup */}
       {newAch && (
         <div style={{
           position: 'fixed', top: 14, left: '50%', transform: 'translateX(-50%)',
@@ -197,7 +278,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Header */}
       <div style={{ padding: '16px 16px 12px', background: 'linear-gradient(180deg, var(--sf), var(--bg))', borderBottom: '1px solid var(--bd)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
@@ -213,10 +293,8 @@ export default function App() {
         </div>
       </div>
 
-      {/* Tab content */}
       <div style={{ padding: '12px 12px 0' }}>{renderTab()}</div>
 
-      {/* Bottom nav */}
       <div style={{
         position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 480, background: 'var(--sf)',
