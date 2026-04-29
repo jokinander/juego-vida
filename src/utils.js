@@ -1,5 +1,5 @@
 // Date helpers
-export const getToday = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+export const getToday = () => new Date().toISOString().split('T')[0];
 
 export const getWeekKey = () => {
   const d = new Date();
@@ -29,8 +29,8 @@ export const save = (key, val) => {
   try { localStorage.setItem(PREFIX + key, JSON.stringify(val)); } catch {}
 };
 
-// XP & Levels
-export const BASE_XP = 100;
+// XP & Levels - MORE SEVERE SYSTEM
+export const BASE_XP = 150; // harder to level up
 export const getLevel = (xp) => {
   if (xp < 0) return { name: 'Rookie', num: 0, color: '#94a3b8', icon: '🌱', min: 0, next: BASE_XP };
   const lv = Math.floor(xp / BASE_XP);
@@ -67,6 +67,10 @@ export const calcHabitStreak = (log) => {
   }
   return s;
 };
+
+// Check if user entered today (for penalty system)
+export const getLastEntry = () => load('lastEntry', null);
+export const setLastEntry = (date) => save('lastEntry', date);
 
 // Constants
 export const MOODS = [
@@ -106,80 +110,52 @@ export const EVENING_PROMPTS = [
   '¿Qué aprendiste hoy que valga la pena recordar?',
 ];
 
-export const GUIDED_STEPS = [
-  'Cerrá los ojos. Sentí tus pies en el piso. Estás acá, estás vivo.',
-  'Inhalá profundo... 1... 2... 3... 4... Exhalá lento...',
-  'Pensá en UNA cosa que te haga bien hoy. Puede ser chiquita.',
-  'Hoy no necesitás ser perfecto. Solo un paso más que ayer.',
-  'Abrí los ojos despacio. Tu día empieza ahora. Vos elegís cómo.',
-];
-
-export const CALM_TIPS = [
-  { t: 'Respiración 4-4-4', d: 'Inhalá 4 seg, mantené 4, exhalá 4. Repetí 5 veces.' },
-  { t: 'Estiramiento matutino', d: '2 min de elongación apenas te levantás.' },
-  { t: 'No agarres el celu', d: 'Los primeros 15 min sin redes.' },
-  { t: 'Agua antes que café', d: 'Un vaso de agua activa todo.' },
-  { t: 'Caminata de 5 min', d: 'Salí afuera. Luz natural resetea tu humor.' },
-  { t: 'Gratitud activa', d: 'Nombrá 3 cosas buenas en voz alta.' },
-  { t: 'Body scan', d: 'Cerrá los ojos. Recorré tu cuerpo, 1 min.' },
-  { t: 'Regla de 2 min', d: 'Si tarda menos de 2 min, hacelo ya.' },
-  { t: 'Música sin letra', d: 'Lo-fi o clásica para arrancar.' },
-  { t: 'Visualizá tu día', d: '30 seg imaginando tu día ideal.' },
+export const DAY_RATING = [
+  { emoji: '😫', label: 'Malo', color: '#ef4444' },
+  { emoji: '😐', label: 'Regular', color: '#94a3b8' },
+  { emoji: '🙂', label: 'Bueno', color: '#4ecdc4' },
+  { emoji: '😁', label: 'Muy bueno', color: '#22d3ee' },
+  { emoji: '🤩', label: 'Increíble', color: '#fbbf24' },
 ];
 
 export const ACHIEVEMENTS = [
-  { id: 'gym1', name: 'Primera Pesa', desc: 'Primer gym', icon: '🏋️', xp: 20, check: s => s.gymTotal >= 1 },
-  { id: 'run1', name: 'Primer Km', desc: 'Primera corrida', icon: '🏃', xp: 20, check: s => s.runTotal >= 1 },
-  { id: 'wkfull', name: 'Semana Completa', desc: '3 gym + 3 corridas', icon: '⚔️', xp: 50, check: s => s.weekGym >= 3 && s.weekRun >= 3 },
-  { id: 'str5', name: 'Racha x5', desc: '5 días entreno', icon: '🔥', xp: 30, check: s => s.streak >= 5 },
-  { id: 'str14', name: 'Racha x14', desc: '14 días seguidos', icon: '💥', xp: 60, check: s => s.streak >= 14 },
-  { id: 'edu1', name: 'Lector', desc: 'Primera educación', icon: '📖', xp: 20, check: s => s.eduTotal >= 1 },
-  { id: 'eduwk', name: 'Semana Educativa', desc: '3 edu/semana', icon: '📚', xp: 40, check: s => s.weekEdu >= 3 },
-  { id: 'tw7', name: 'Info Junkie', desc: '7 días Twitter', icon: '🐦', xp: 25, check: s => s.twitterTotal >= 7 },
-  { id: 'fam1', name: 'Buen Hijo', desc: 'Llamar a papá y mamá', icon: '📞', xp: 25, check: s => s.calledParents >= 1 },
-  { id: 'fam2', name: 'Hermano del Año', desc: 'Ver a Aitziber', icon: '👫', xp: 25, check: s => s.sawSister >= 1 },
-  { id: 'med5', name: 'Mente Clara', desc: '5 meditaciones', icon: '🧘', xp: 30, check: s => s.meditateTotal >= 5 },
-  { id: 'chk10', name: 'Reflexivo', desc: '10 check-ins', icon: '📝', xp: 30, check: s => s.checkinTotal >= 10 },
-  { id: 'proj5', name: 'Ideador', desc: '5 ideas de proyecto', icon: '💡', xp: 30, check: s => s.ideasTotal >= 5 },
-  { id: 'plan1', name: 'Planificador', desc: 'Planificar en Work', icon: '📋', xp: 20, check: s => s.workPlanned >= 1 },
-  { id: 'hab7', name: '7 Días Limpio', desc: 'Racha 7 en un hábito', icon: '🛡️', xp: 50, check: s => s.bestHabit >= 7 },
-  { id: 'hab30', name: 'Mes Limpio', desc: '30 días en un hábito', icon: '💎', xp: 100, check: s => s.bestHabit >= 30 },
-  { id: 'wkperf', name: 'Semana Perfecta', desc: 'Todos los objetivos', icon: '🌟', xp: 75, check: s => s.weekPerfect },
-  { id: 'quote1', name: 'Motivador', desc: 'Tu primera frase', icon: '✍️', xp: 15, check: s => s.customQuotes >= 1 },
+  { id: 'gym1', name: 'Primera Pesa', desc: 'Primer gym', icon: '🏋️', xp: 10, check: s => s.gymTotal >= 1 },
+  { id: 'run1', name: 'Primer Km', desc: 'Primera corrida', icon: '🏃', xp: 10, check: s => s.runTotal >= 1 },
+  { id: 'wkfull', name: 'Semana Completa', desc: '3 gym + 3 corridas', icon: '⚔️', xp: 30, check: s => s.weekGym >= 3 && s.weekRun >= 3 },
+  { id: 'str5', name: 'Racha x5', desc: '5 días entreno', icon: '🔥', xp: 20, check: s => s.streak >= 5 },
+  { id: 'str14', name: 'Racha x14', desc: '14 días seguidos', icon: '💥', xp: 40, check: s => s.streak >= 14 },
+  { id: 'edu1', name: 'Lector', desc: 'Primera educación', icon: '📖', xp: 10, check: s => s.eduTotal >= 1 },
+  { id: 'fam1', name: 'Buen Hijo', desc: 'Llamar a papá y mamá', icon: '📞', xp: 15, check: s => s.calledParents >= 1 },
+  { id: 'fam2', name: 'Hermano del Año', desc: 'Ver a Aitziber', icon: '👫', xp: 15, check: s => s.sawSister >= 1 },
+  { id: 'proj5', name: 'Ideador', desc: '5 ideas de proyecto', icon: '💡', xp: 20, check: s => s.ideasTotal >= 5 },
+  { id: 'hab7', name: '7 Días Limpio', desc: 'Racha 7 en un hábito', icon: '🛡️', xp: 30, check: s => s.bestHabit >= 7 },
+  { id: 'hab30', name: 'Mes Limpio', desc: '30 días en un hábito', icon: '💎', xp: 60, check: s => s.bestHabit >= 30 },
+  { id: 'wkperf', name: 'Semana Perfecta', desc: 'Todos los objetivos', icon: '🌟', xp: 50, check: s => s.weekPerfect },
 ];
 
-// Rain sound
-let audioCtx = null, rainSource = null, rainGain = null;
-
-export const startRain = () => {
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const size = 2 * audioCtx.sampleRate;
-    const buffer = audioCtx.createBuffer(1, size, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < size; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
-    rainSource = audioCtx.createBufferSource();
-    rainSource.buffer = buffer;
-    rainSource.loop = true;
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 800;
-    rainGain = audioCtx.createGain();
-    rainGain.gain.setValueAtTime(0, audioCtx.currentTime);
-    rainGain.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 2);
-    rainSource.connect(filter);
-    filter.connect(rainGain);
-    rainGain.connect(audioCtx.destination);
-    rainSource.start();
-  } catch (e) { console.log('Audio error:', e); }
-};
-
-export const stopRain = () => {
-  try {
-    if (rainGain && audioCtx) rainGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
-    setTimeout(() => {
-      try { rainSource?.stop(); audioCtx?.close(); } catch {}
-      rainSource = null; rainGain = null; audioCtx = null;
-    }, 2000);
-  } catch {}
+// XP VALUES - more severe
+export const XP = {
+  checkin: 3,
+  gym: 8,
+  run: 6,
+  plank: 5,
+  pushups: 4,
+  workPlan: 4,
+  workCoord: 4,
+  eduReading: 5,
+  eduPodcast: 5,
+  eduVideo: 5,
+  twitter: 2,
+  familyCall: 8,
+  familySister: 8,
+  taskComplete: 2,
+  idea: 3,
+  journal: 3,
+  habitClean: 4,
+  // PENALTIES
+  habitBadSmoke: -25,
+  habitBadEat: -15,
+  habitBadAlcohol: -15,
+  missedDay: -30, // not entering app for a day
+  missedSecondEntry: -15, // not entering twice
 };

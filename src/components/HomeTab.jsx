@@ -1,23 +1,26 @@
 import { Card, Section, WeekDots } from './UI';
-import { getLevel, calcHabitStreak } from '../utils';
+import { getLevel, calcHabitStreak, XP } from '../utils';
 
 export default function HomeTab({ state }) {
-  const { xp, checkins, today, quote, gym, run, edu, twitter, meditate, workLog,
-    weekGym, weekRun, weekEdu, weekFam, streak, habits, achs, ACHS_LIST } = state;
+  const { xp, checkins, today, quote, gym, run, edu, twitter, workLog,
+    weekGym, weekRun, weekEdu, weekFam, streak, habits, achs, ACHS_LIST,
+    plank, pushups, weekPlank } = state;
 
   const level = getLevel(xp);
   const xpPct = Math.min(((xp - level.min) / (level.next - level.min)) * 100, 100);
 
   const doneIcons = [
     gym[today] && '🏋️', run[today] && '🏃',
+    plank[today] && '🧱', pushups[today] && '💪',
     Object.values(edu[today] || {}).some(Boolean) && '📚',
-    twitter[today] && '🐦', meditate[today] && '🧘',
+    twitter[today] && '🐦',
     (workLog[today] || {}).planned && '📋',
   ].filter(Boolean);
 
   const objs = [
     { l: 'Gym 3/sem', d: weekGym >= 3 },
     { l: 'Corrida 3/sem', d: weekRun >= 3 },
+    { l: 'Plancha 3/sem', d: weekPlank >= 3 },
     { l: 'Edu 3/sem', d: weekEdu >= 3 },
     { l: 'Llamar padres', d: !!weekFam.calledParents },
     { l: 'Ver Aitziber', d: !!weekFam.sawAitziber },
@@ -56,6 +59,9 @@ export default function HomeTab({ state }) {
           </div>
         </div>
         {streak > 0 && <div style={{ fontFamily: 'var(--mf)', fontSize: 11, color: 'var(--c5)' }}>🔥 {streak} días</div>}
+        <div style={{ fontFamily: 'var(--mf)', fontSize: 9, color: 'var(--t2)', marginTop: 4 }}>
+          ⚠️ No entrar = -{Math.abs(XP.missedDay)} XP/día
+        </div>
       </Card>
 
       {/* Weekly Objectives */}
@@ -79,6 +85,7 @@ export default function HomeTab({ state }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <WeekDots current={weekGym} max={3} color="var(--c1)" icon="🏋️" />
             <WeekDots current={weekRun} max={3} color="var(--c2)" icon="🏃" />
+            <WeekDots current={weekPlank} max={3} color="var(--c5)" icon="🧱" />
           </div>
         </Section>
       </Card>
