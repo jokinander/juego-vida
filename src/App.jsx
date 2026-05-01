@@ -185,7 +185,6 @@ export default function App() {
     { id: 'projects', icon: '🚀', label: 'PROY', color: 'var(--grn)' },
     { id: 'family', icon: '❤️', label: 'FAMILIA', color: 'var(--c1)' },
     { id: 'habits', icon: '🛡️', label: 'HÁBITOS', color: 'var(--grn)' },
-  { id: 'biblioteca', icon: '📖', label: 'BIBLIO', color: 'var(--c3)' },
   ];
 
   const renderTab = () => {
@@ -198,7 +197,6 @@ export default function App() {
       case 'projects': return <ProjectsTab projects={projects} setProjects={setProjects} addXP={addXP} today={today} />;
       case 'family': return <FamilyTab family={family} weekFam={weekFam} onLogFamily={logFamily} />;
       case 'habits': return <HabitsTab habits={habits} today={today} onLogHabit={logHabit} />;
-      case 'biblioteca': return <BibliotecaTab addXP={addXP} />;
       default: return <HomeTab state={homeState} />;
     }
   };
