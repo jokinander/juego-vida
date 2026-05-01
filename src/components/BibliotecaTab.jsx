@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
+const DOC_REF = doc(db, 'juego', 'jokin');
+
 const CATEGORIAS = [
   { id: 'all', label: 'Todas', icon: '✨' },
   { id: 'motivacional', label: 'Motivación', icon: '🔥' },
@@ -39,10 +41,9 @@ export default function BibliotecaTab({ addXP }) {
 
   const cargarFrases = async () => {
     try {
-      const ref = doc(db, 'finanzas', 'biblioteca');
-      const snap = await getDoc(ref);
-      if (snap.exists() && snap.data().frases?.length > 0) {
-        setFrases(snap.data().frases);
+      const snap = await getDoc(DOC_REF);
+      if (snap.exists() && snap.data().biblioteca?.length > 0) {
+        setFrases(snap.data().biblioteca);
       }
     } catch (e) {
       console.error(e);
@@ -54,7 +55,7 @@ export default function BibliotecaTab({ addXP }) {
   const guardarFrases = async (nuevas) => {
     setGuardando(true);
     try {
-      await setDoc(doc(db, 'finanzas', 'biblioteca'), { frases: nuevas });
+      await setDoc(DOC_REF, { biblioteca: nuevas }, { merge: true });
     } catch (e) {
       console.error(e);
     } finally {
