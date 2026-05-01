@@ -37,7 +37,7 @@ export default function App() {
   } = useFirebaseState();
 
   // Quote
-  const allQuotes = [...BASE_QUOTES, ...customQuotes];
+    const allQuotes = [...BASE_QUOTES, ...customQuotes];
   const [quote] = useState(() => allQuotes[Math.floor(Math.random() * Math.max(allQuotes.length, 1))] || BASE_QUOTES[0]);
   const [eveningPrompt] = useState(() => EVENING_PROMPTS[Math.floor(Math.random() * EVENING_PROMPTS.length)]);
 
@@ -185,6 +185,7 @@ export default function App() {
     { id: 'projects', icon: '🚀', label: 'PROY', color: 'var(--grn)' },
     { id: 'family', icon: '❤️', label: 'FAMILIA', color: 'var(--c1)' },
     { id: 'habits', icon: '🛡️', label: 'HÁBITOS', color: 'var(--grn)' },
+  { id: 'biblioteca', icon: '📖', label: 'BIBLIO', color: 'var(--c3)' },
   ];
 
   const renderTab = () => {
