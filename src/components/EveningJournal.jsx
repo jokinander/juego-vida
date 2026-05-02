@@ -5,7 +5,7 @@ export default function EveningJournal({ prompt, value, dayRating, onChangeText,
   return (
     <div style={{
       minHeight: '100vh', background: 'linear-gradient(180deg, #0c0c18, #0c1220, #0c0c18)',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24,
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: 24, paddingTop: 40,
     }}>
       <div style={{ fontSize: 48, marginBottom: 8 }}>🌙</div>
       <h1 style={{ fontWeight: 900, fontSize: 22, color: 'var(--tx)', marginBottom: 4 }}>Buenas noches, Jok</h1>
